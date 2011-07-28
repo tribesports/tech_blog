@@ -2,10 +2,10 @@
 #      Main Configs       #
 # ----------------------- #
 
-url: http://yoursite.com
-title: My Octopress Blog
-subtitle: A blogging framework for hackers.
-author: Your Name
+url: http://tribesports.github.com
+title: Tribesports Tech Blog
+subtitle: Things we said, then wrote down.
+author: Tribesports Tech Team
 simple_search: http://google.com/search
 
 # RSS / Email (optional) subscription links (change if using something like Feedburner)
@@ -38,7 +38,7 @@ recent_posts: 5 # Posts in the sidebar Recent Posts section
 # ----------------------- #
 
 # Twitter
-twitter_user:
+twitter_user: tribesportstech
 twitter_tweet_count: 4
 twitter_show_replies: false
 twitter_follow_button: true
@@ -58,7 +58,7 @@ delicious_user:
 delicious_count: 3
 
 # Disqus Comments
-disqus_short_name:
+disqus_short_name: tribesportstechblog
 
 # Google Analytics
 google_analytics_tracking_id:

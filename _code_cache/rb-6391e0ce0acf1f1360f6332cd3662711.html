@@ -1,0 +1,14 @@
+<div class="highlight"><pre><span class="c1"># app/renderers/api_v1_renderer.rb </span>
+<span class="no">ActionController</span><span class="o">::</span><span class="no">Renderers</span><span class="o">.</span><span class="n">add</span> <span class="ss">:api_v1</span> <span class="k">do</span> <span class="o">|</span><span class="n">resource</span><span class="p">,</span> <span class="n">options</span><span class="o">|</span>
+  <span class="nb">self</span><span class="o">.</span><span class="n">content_type</span> <span class="o">=</span> <span class="no">Mime</span><span class="o">::</span><span class="no">API_V1</span>
+  <span class="nb">self</span><span class="o">.</span><span class="n">response_body</span> <span class="o">=</span> <span class="n">resource</span><span class="o">.</span><span class="n">to_api_v1</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+<span class="k">end</span>
+
+<span class="c1"># app/controllers/application_controller.rb</span>
+<span class="n">require_relative</span> <span class="s1">&#39;../renderers/api_v1_renderer.rb&#39;</span>
+
+<span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
+  <span class="c1">#...</span>
+<span class="k">end</span>
+</pre>
+</div>

@@ -6,6 +6,6 @@ comments: true
 categories: 
 ---
 
-I want a blog
+We want a blog
 
-So I can pontificate
+So we can pontificate

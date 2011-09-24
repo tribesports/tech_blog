@@ -1,8 +1,38 @@
 #custom filters for Octopress
-require './plugins/pygments_code'
+require './plugins/backtick_code_block'
+require './plugins/post_filters'
+require './plugins/raw'
+require 'rubypants'
 
 module OctopressFilters
-  include HighlightCode
+  include BacktickCodeBlock
+  include TemplateWrapper
+  def pre_filter(input)
+    input = render_code_block(input)
+    input.gsub /(<figure.+?>.+?<\/figure>)/m do
+      safe_wrap($1)
+    end
+  end
+  def post_filter(input)
+    input = unwrap(input)
+    RubyPants.new(input).to_html
+  end
+end
+
+module Jekyll
+  class ContentFilters < PostFilter
+    include OctopressFilters
+    def pre_render(post)
+      post.content = pre_filter(post.content)
+    end
+    def post_render(post)
+      post.content = post_filter(post.content)
+    end
+  end
+end
+
+
+module OctopressLiquidFilters
   # Used on the blog index to split posts on the <!--more--> marker
   def excerpt(input)
     if input.index(/<!--\s*more\s*-->/i)
@@ -10,6 +40,11 @@ module OctopressFilters
     else
       input
     end
+  end
+
+  # Checks for excerpts (helpful for template conditionals)
+  def has_excerpt(input)
+    input =~ /<!--\s*more\s*-->/i ? true : false
   end
 
   # Summary is used on the Archive pages to return the first block of content from a post.
@@ -21,22 +56,17 @@ module OctopressFilters
     end
   end
 
-  # for Github style codeblocks eg.
-  # ``` ruby
-  #     code snippet
-  # ```
-  def backtick_codeblock(input)
-    input.gsub /<p>`{3}\s(\w+)<\/p>\n\n<pre><code>([^<]+)<\/code><\/pre>\n\n<p>`{3}<\/p>/m do
-      lang = $1
-      str  = $2.gsub('&lt;','<').gsub('&gt;','>')
-      highlight(str, lang)
-    end
+  # Extracts raw content DIV from template, used for page description as {{ content }}
+  # contains complete sub-template code on main page level
+  def raw_content(input)
+    /<div class="entry-content">(?<content>[\s\S]*?)<\/div>\s*<(footer|\/article)>/ =~ input
+    return (content.nil?) ? input : content
   end
 
   # Replaces relative urls with full urls
   def expand_urls(input, url='')
     url ||= '/'
-    input.gsub /(\s+(href|src)\s*=\s*["|']{1})(\/[^\"'>]+)/ do
+    input.gsub /(\s+(href|src)\s*=\s*["|']{1})(\/[^\"'>]*)/ do
       $1+url+$3
     end
   end
@@ -54,12 +84,6 @@ module OctopressFilters
     input.gsub /(https?:\/\/)(\S+)/ do
       $2
     end
-  end
-
-  # replaces primes with smartquotes using RubyPants
-  def smart_quotes(input)
-    require 'rubypants'
-    RubyPants.new(input).to_html
   end
 
   # Returns a title cased string based on John Gruber's title case http://daringfireball.net/2008/08/title_case_update
@@ -95,5 +119,5 @@ module OctopressFilters
     end
   end
 end
-Liquid::Template.register_filter OctopressFilters
+Liquid::Template.register_filter OctopressLiquidFilters
 

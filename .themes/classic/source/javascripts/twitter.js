@@ -1,13 +1,15 @@
 // JSON-P Twitter fetcher for Octopress
 // (c) Brandon Mathis // MIT Lisence
 function getTwitterFeed(user, count, replies) {
-  feed = new jXHR();
+  var feed = new jXHR();
+
   feed.onerror = function (msg,url) {
     $('#tweets li.loading').addClass('error').text("Twitter's busted");
   }
   feed.onreadystatechange = function(data){
     if (feed.readyState === 4) {
       var tweets = new Array();
+      var i = 0;
       for (i in data){
         if(tweets.length < count){
           if(replies || data[i].in_reply_to_user_id == null){
@@ -66,7 +68,7 @@ function prettyDate(time) {
   var diff = ((current_date_full - date.getTime()) / 1000);
   var day_diff = Math.floor(diff / 86400);
 
-  if (isNaN(day_diff) || day_diff < 0 || day_diff >= 31) return;
+  if (isNaN(day_diff) || day_diff < 0) return "<span>&infin;</span>";
 
   return day_diff == 0 && (
     diff < 60 && say.just_now ||
@@ -76,5 +78,5 @@ function prettyDate(time) {
     diff < 86400 && Math.floor(diff / 3600) + say.hours_ago) ||
     day_diff == 1 && say.yesterday ||
     day_diff < 7 && day_diff + say.days_ago ||
-    day_diff < 31 && Math.ceil(day_diff / 7) + say.weeks_ago;
+    day_diff > 7 && Math.ceil(day_diff / 7) + say.weeks_ago;
 }

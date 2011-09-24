@@ -15,7 +15,7 @@ Our goals are as follows:
 2. Separate API presentation logic from business models
 3. Minimise additional controller complexity
 
-Like all good REST disciples, we know that adding versioning information to URLs will cause the breakdown of civil society, so we define a custom Mime type for use in the Accept header of requests:
+Like all good REST disciples, we know that adding versioning information to URLs will cause the breakdown of civil society, so we define a custom MIME type for use in the Accept header of requests:
 
 {% codeblock config/initializers/mime_types.rb %}
 Mime::Type.register "application/vnd.tribesports.api.v1+json", :api_v1
@@ -36,12 +36,13 @@ class ActivitiesController < ApplicationController
 end
 {% endcodeblock %}
 
-So far, so good. There are two problems here, however. Firstly, we're left with controller-level boilerplate that must be replicated in every method that responds to API calls. And secondly, we're falling back on our business model's default `#as_json` method, which will render the entire object. We could override it, or pass in options, but the former conflicts with our versioning requirement while the latter would spread presentation logic throughout our controllers.
+Already, then, we're able to recognise and respond appropriately to requests for our custom MIME type. There are two problems here, however. Firstly, we're left with controller-level boilerplate that must be replicated in every method that responds to API calls. And secondly, we're falling back on our business model's default `#as_json` method, which will render the entire object. We could override it, or pass in options, but the former conflicts with our versioning requirement while the latter would spread presentation logic throughout our controllers.
 
 To address these problems, we look to Rails 3's responders and renderers. If we don't supply a `format.api_v1` block in the response block, Rails' [default Responder](https://github.com/rails/rails/blob/master/actionpack/lib/action_controller/metal/responder.rb) will attempt to intelligently render the resource in the given format. The logic for a simple `show` action varies depending on the format type, and runs roughly thus for a given resource:
 
-  * Navigational formats (e.g. HTML): Render using the appropriate template (e.g. `'activities/show.html.haml'`)
-  * API formats (everything else): If the resource responds to a `#to_#{format}` method, and we know how to render the format, do so; otherwise, attempt to render using an appropriate template.
+  * **Navigational formats** (e.g. HTML): Render using the appropriate template (e.g. `'activities/show.html.haml'`)
+
+  * **API formats** (everything else): If the resource responds to a `#to_#{format}` method, and a renderer exists for the format, then use the renderer; otherwise, attempt to render using an appropriate template.
 
 For update and create methods there is additional logic to deal with redirection and error handling, but this represents the basics.
 
@@ -57,24 +58,24 @@ module ActionController
     add :json do |json, options|
       json = json.to_json(options) unless json.kind_of?(String)
       json = "#{options[:callback]}(#{json})" unless options[:callback].blank?
-      self.content_type ||= Mime::JSON
+      self.content_type ||= MIME::JSON
       json
     end
   end
 end
 {% endcodeblock %}
 
-We can see the renderer is passed the resource (potentially as an already-JSON-encoded string) and a set of options. If the resource isn't already encoded, the renderer encodes it using the supplied options. It then wraps it in an optional callback, sets the response Mime type, and returns the output. So our custom renderer might appear as follows:
+We can see the renderer is passed the resource (potentially as an already-JSON-encoded string) and a set of options. If the resource isn't already encoded, the renderer encodes it using the supplied options. It then wraps it in an optional callback, sets the response MIME type, and returns the output. So our custom renderer might appear as follows:
 
 {% codeblock lang:ruby %}
 # app/renderers/api_v1_renderer.rb 
 ActionController::Renderers.add :api_v1 do |resource, options|
-  self.content_type = Mime::API_V1
+  self.content_type = MIME::API_V1
   self.response_body = resource.to_api_v1(options)
 end
 
 # app/controllers/application_controller.rb
-require_relative '../renderers/api_v1_renderer.rb'
+require_relative '../renderers/api_v1_renderer'
 
 class ApplicationController < ActionController::Base
   #...
@@ -109,5 +110,7 @@ class ActivitiesController < ApplicationController
   end
 end
 {% endcodeblock %}
+
+We can now send a request using our custom MIME type in the Accept header, and [receive an appropriate response](https://gist.github.com/1239258).
 
 So far, so good. We've got the Rails responder doing all our heavy lifting, our controllers are clean, and we have versioned resource presentation. That's two of our goals accomplished, but we've still got presentation logic cluttering up our business models. To address that we'll be using Decorators, which will be the subject of our next blog post.

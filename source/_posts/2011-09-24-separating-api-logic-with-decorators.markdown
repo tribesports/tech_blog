@@ -90,7 +90,7 @@ Now we have a custom responder that will handle decorated resources properly; we
 
 {% codeblock app/renderers/api_v1_renderer.rb %}
 ActionController::Renderers.add(:api_v1) do |resource, options|
-  self.content_type = MIME::API_V1
+  self.content_type = Mime::API_V1
   decorated_resource = ApplicationDecorator.decorator_for(resource, :api_v1) || resource
   render options.merge(:json => decorated_resource)
 end

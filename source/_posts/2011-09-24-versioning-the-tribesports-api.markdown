@@ -58,7 +58,7 @@ module ActionController
     add :json do |json, options|
       json = json.to_json(options) unless json.kind_of?(String)
       json = "#{options[:callback]}(#{json})" unless options[:callback].blank?
-      self.content_type ||= MIME::JSON
+      self.content_type ||= Mime::JSON
       json
     end
   end
@@ -70,7 +70,7 @@ We can see the renderer is passed the resource (potentially as an already-JSON-e
 {% codeblock lang:ruby %}
 # app/renderers/api_v1_renderer.rb 
 ActionController::Renderers.add :api_v1 do |resource, options|
-  self.content_type = MIME::API_V1
+  self.content_type = Mime::API_V1
   self.response_body = resource.to_api_v1(options)
 end
 

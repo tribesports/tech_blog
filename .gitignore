@@ -45,3 +45,4 @@ coverage
 solr/data
 .DS_Store
 public/sitemap*.gz
+tags

@@ -7,7 +7,7 @@ author: "Simon Coffey"
 categories: [API, Rails, Responders, Renderers]
 ---
 
-As Andrew is hard at work on Tribesports' upcoming iPhone app, we've been paying a bit of attention to our API. Where previously we had responded to JSON requests in a rather ad-hoc fashion according to our application's internal needs, a full-blown API requires a more systematic approach.
+As Andrew is hard at work on the upcoming [Tribesports](http://tribesports.com) iPhone app, we've been paying a bit of attention to our API. Where previously we had responded to JSON requests in a rather ad-hoc fashion according to our application's internal needs, a full-blown API requires a more systematic approach.
 
 Our goals are as follows:
 
@@ -40,9 +40,13 @@ Already, then, we're able to recognise and respond appropriately to requests for
 
 To address these problems, we look to Rails 3's responders and renderers. If we don't supply a `format.api_v1` block in the response block, Rails' [default Responder](https://github.com/rails/rails/blob/master/actionpack/lib/action_controller/metal/responder.rb) will attempt to intelligently render the resource in the given format. The logic for a simple `show` action varies depending on the format type, and runs roughly thus for a given resource:
 
-  * **Navigational formats** (e.g. HTML): Render using the appropriate template (e.g. `'activities/show.html.haml'`)
+  * **Navigational formats** (e.g. HTML):
 
-  * **API formats** (everything else): If the resource responds to a `#to_#{format}` method, and a renderer exists for the format, then use the renderer; otherwise, attempt to render using an appropriate template.
+    Render using the appropriate template (e.g. `'activities/show.html.haml'`)
+
+  * **API formats** (everything else):
+
+    If the resource responds to a `#to_#{format}` method, and a renderer exists for the format, then use the renderer; otherwise, attempt to render using an appropriate template.
 
 For update and create methods there is additional logic to deal with redirection and error handling, but this represents the basics.
 

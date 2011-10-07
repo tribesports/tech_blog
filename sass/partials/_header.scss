@@ -1,21 +1,18 @@
 body > header {
-  background: $header-bg url(/images/header-logo.png);
-	background-repeat: no-repeat;
+  background: $header-bg;
   h1 {
     display: inline-block;
     margin: 0;
     a, a:visited, a:hover {
       color: $title_color;
       text-decoration: none;
-			text-shadow: darken($base02, 20) 0 0 2px;
     }
   }
   h2 {
     margin: .2em 0 0;
     @extend .sans;
     font-size: 1em;
-    color: $title_color;
+    color: $subtitle-color;
     font-weight: normal;
-		text-shadow: darken($base02, 20) 0 0 2px;
   }
 }

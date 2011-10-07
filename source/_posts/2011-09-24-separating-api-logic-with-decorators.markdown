@@ -3,7 +3,7 @@ layout: post
 title: "Separating API Logic With Decorators"
 date: 2011-09-24 13:49
 comments: true
-published: false
+published: true
 author: "Simon Coffey"
 categories: [API, Rails, Decorators]
 ---
@@ -66,10 +66,11 @@ class ApplicationDecorator < Draper::Base
 
   private
 
-  # (<#Activity 1>, :api_v1) => API_V1::ActivityDecorator
+  # (<#Activity id: 1>, :api_v1) => API_V1::ActivityDecorator
   def self.decorator_class_for(resource, format)
     namespace_for(format).const_get(decorator_name_for(resource))
-  rescue NameError
+  rescue NameError => e
+    raise if e.is_a?(NoMethodError)
     nil
   end
 
@@ -84,7 +85,7 @@ class ApplicationDecorator < Draper::Base
 end
 {% endcodeblock %}
 
-This means that if we're consistent with our decorator naming, we can look up the appropriate decorator according to resource class and format. The above is slightly simplified - there are extra cases required if the resource is an array or an `ActiveRecord::Relation` (this will happen in index actions, for example), but these aren't particularly interesting.
+This means that if we're consistent with our decorator naming, we can look up the appropriate decorator according to resource class and format. The above is slightly simplified - there are extra cases required if the resource is an array or an `ActiveRecord::Relation` (as you might see in index actions), but these aren't particularly interesting.
 
 Now we have a custom responder that will handle decorated resources properly; we have a decorator lookup system that will return an appropriately-decorated resource according to the requested format; and we have the decorator itself. All we need to do now is modify our renderer so that it will decorate a resource appropriately before rendering it.
 
@@ -96,9 +97,9 @@ ActionController::Renderers.add(:api_v1) do |resource, options|
 end
 {% endcodeblock %}
 
-This is largely self-explanatory; the main point to note about this renderer is that if it can't find an appropriate decorator, it will fall back on the default json rendering. Isn't that what we wanted to avoid? Yes, but with a caveat. If a resource has errors (for example, after an invalid update), the responder doesn't render the resource itself; it renders the errors. We therefore need to handle the case when the renderer is passed an array of errors, when we simply want to send the JSON representation of that array.
+This is largely self-explanatory; the main point to note is that if the renderer can't find an appropriate decorator, it will fall back on the default json rendering. Isn't that what we wanted to avoid? Yes, but with a caveat: if a resource has errors (for example, after an invalid update), the responder doesn't render the resource itself; it renders the array of errors. In this case, then, for the time being we're just going to send the JSON representation of that array.
 
-Finally, since we're using the built-in JSON renderer to actually create the output, we modify our decorators to respond to `#as_json` instead of `#to_api_v1`:
+Finally, since we're using the built-in JSON renderer to actually create the output (it's JSON we're sending, after all), we modify our decorators to respond to `#as_json` instead of `#to_api_v1`:
 
 {% codeblock app/decorators/api_v1/activity_decorator.rb %}
 module API_V1
@@ -116,13 +117,14 @@ module API_V1
 end
 {% endcodeblock %}
 
-To recap, we have:
+And that's it! To recap, we have:
 
-1. Defined a custom MIME type to inform Rails about our API format,
-2. created a custom responder to let Rails know what resources can be renderered,
-3. created a custom renderer to decorate our resources before rendering, and
-4. built a decorator lookup to locate the appropriate decorator for each resource.
+1. Registered a custom MIME type to inform Rails about our API format,
+2. Written decorators to contain the API presentation logic,
+3. Built a lookup system to locate the format-specific decorator for each resource,
+4. Created a custom responder to let Rails know what resources can be renderered, and
+5. Created a custom renderer that first decorates our resources, then renders them.
 
-As a result, we're able to keep our API presentation logic completely separate, versioned using format-specific namespaces. Adding a new API version is as simple as defining a new MIME type, renderer and the appropriate decorators. And finally, our controller actions are completely untouched - no complex format-specific logic.
+As a result, we're able to keep our API presentation logic completely separate, organised using version-specific namespaces. Adding a new controller action to our API is as simple as writing `respond_to :api_v1` in the appropriate controller, and ensuring that a correctly-named decorator exists for that resource type. To create a second version of the API, we just define a new MIME type, renderer and add the appropriate decorators. And all of this means that our controller actions themselves require no extra code at all.
 
-We've achieved all of our [original goals](/blog/2011/09/24/versioning-the-tribesports-api), and with only a few tens of lines of code. Time for a particularly smug cup of tea; the Tribesports office favours Oolong for this purpose, although Lapsang Souchong will do in a pinch.
+We've achieved all of our [original goals](/blog/2011/09/24/versioning-the-tribesports-api), and with only a few tens of lines of code. Time for a particularly smug cup of tea; the Tribesports office favours [Oolong](http://en.wikipedia.org/wiki/Oolong_%28rabbit%29) for this purpose. Lapsang Souchong is alleged by some to be smugger still, but it tastes like boiled furniture.

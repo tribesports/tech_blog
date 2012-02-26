@@ -1,2 +1,14 @@
 // This File is imported last, and will override other styles in the cascade
 // Add styles here to make changes without digging in too much
+
+body > header {
+  background: $header-bg url(/images/header-logo.png);
+  background-repeat: no-repeat;
+  h1 {
+    text-shadow: darken($base02, 20) 0 0 2px;
+  }
+  h2 {
+    color: $title-color;
+    text-shadow: darken($base02, 20) 0 0 2px;
+  }
+}

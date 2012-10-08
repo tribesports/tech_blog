@@ -204,8 +204,8 @@ Now let's take a look at an example listener:
 {% codeblock app/listeners/mail_listener.rb %}
 class MailListener
 
-  def initialize(announcer, user_mail_job_klass = MailJob)
-    @user_mail_job_klass = user_mail_job_klass
+  def initialize(announcer, mail_job_klass = MailJob)
+    @mail_job_klass = mail_job_klass
     announcer.add_listener(self)
   end
 
@@ -219,7 +219,7 @@ class MailListener
   private
 
   def mail(*args)
-    @user_mail_job_klass.new(*args)
+    @mail_job_klass.new(*args)
   end
 
 end

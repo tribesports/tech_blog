@@ -229,8 +229,9 @@ end
 require_relative '../../app/listeners/mail_listener'
 
 describe MailListener do
+  let(:announcer) { stub_everything("Announcer")                   }
   let(:job_klass) { stub_everything("Class:MailJob", :new => true) } 
-  let(:listener)  { MailListener.new(job_klass)                    } 
+  let(:listener)  { MailListener.new(announcer, job_klass)         } 
 
   describe "#create_comment" do
     let(:user)        { stub("User")                          } 
@@ -440,7 +441,7 @@ I don't know. Maybe?
 
 This was a response to our controllers having built up a thick crust of
 cross-cutting concerns during the lifetime of our app. At the moment
-weeve got 9 listeners handling around 150 different post-action tasks,
+we've got 9 listeners handling around 150 different post-action tasks,
 and there's more work to be done. For us, the benefits of moving to this
 system have been pretty clear already. For a smaller app, or one with a
 shorter projected lifespan, this approach may well be overkill.

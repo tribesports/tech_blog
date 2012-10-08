@@ -12,6 +12,8 @@ In our [last post](/blog/2011/09/24/versioning-the-tribesports-api) we demonstra
 
 However, we were left with unsightly `#to_api_v1` methods on all of our business models. We'd like to separate presentation logic from our business logic, and to do that we're going to use decorators. We're making use of Jeff Casimir's [draper](https://github.com/jcasimir/draper) gem, which provides some nice convenience methods for decorating Rails models.
 
+<!--more-->
+
 We start by creating a namespaced decorator for our Activity model, and move the `Activity#to_api_v1` method into it:
 
 {% codeblock app/decorators/api_v1/activity_decorator.rb %}

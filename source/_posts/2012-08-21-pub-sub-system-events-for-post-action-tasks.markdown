@@ -14,6 +14,8 @@ We cleaned ours up using a pub/sub system of announced events and
 task-specific listeners. This made our app easier to modify, easier to
 test, and easier to read. Probably.
 
+<!--more-->
+
 ## Introduction
 
 In many Rails applications, controllers end up cluttered with a wide

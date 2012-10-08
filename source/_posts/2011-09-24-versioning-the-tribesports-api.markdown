@@ -15,6 +15,8 @@ Our goals are as follows:
 2. Separate API presentation logic from business models
 3. Minimise additional controller complexity
 
+<!--more-->
+
 Like all good REST disciples, we know that adding versioning information to URLs will cause the breakdown of civil society, so we define a custom MIME type for use in the Accept header of requests:
 
 {% codeblock config/initializers/mime_types.rb %}

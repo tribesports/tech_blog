@@ -146,8 +146,6 @@ First, let's take a look at the announcer:
 {%codeblock lib/announcer.rb %}
 class Announcer
 
-  attr_reader :listeners
-
   def listeners
     @listeners ||= []
   end
